@@ -1,5 +1,6 @@
 package org.example;
 
+import java.util.InputMismatchException;
 import java.util.Scanner;
 
 public class Menu {
@@ -15,7 +16,7 @@ public class Menu {
     }
 
     public void startConsoleMenu() {
-         menuDisplay.showMain();
+        menuDisplay.showMain();
         int choice = scanner.nextInt();
 
         switch (choice) {
@@ -39,16 +40,29 @@ public class Menu {
 
     public void registerMembers() {
         System.out.println("Member Quantity: ");
-        int housemateCount = scanner.nextInt();
-        for (int i = 1; i <= housemateCount; i++) {
-            System.out.println("Member "+i);
-            System.out.println("Name: ");
-            String name = scanner.next();
-            System.out.println("Phone number");
-            String phoneNumber = scanner.next();
-            reminderService.addHousemate(housemate = new Housemate(name, phoneNumber));
-            reminderService.printMembers();
+        int housemateCount = -1;
+
+        while (housemateCount < 0) {
+            try {
+                housemateCount = scanner.nextInt();
+                if (housemateCount < 0) {
+                    System.out.println("Invalid Input. Only non negative ints");
+                }
+            }   catch (InputMismatchException e) {
+                System.out.println("Invalid Input. Enter valid number");
+                scanner.nextLine();
+            }
         }
+            for (int i = 1; i <= housemateCount; i++) {
+                System.out.println("Member "+i);
+                System.out.println("Name: ");
+                String name = scanner.next();
+                System.out.println("Phone number");
+                String phoneNumber = scanner.next();
+                reminderService.addHousemate(housemate = new Housemate(name, phoneNumber));
+                reminderService.printMembers();
+            }
+
         System.out.println("\nINFO: Housemate registration complete\n");
         startConsoleMenu();
     }

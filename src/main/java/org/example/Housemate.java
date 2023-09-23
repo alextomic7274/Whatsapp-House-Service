@@ -6,7 +6,7 @@ public class Housemate {
 
     public Housemate(String name, String phoneNumber) {
         this.name = name;
-        this.phoneNumber = "whatsapp:"+phoneNumber;
+        this.phoneNumber = phoneNumber;
     }
 
     public String getName() {
