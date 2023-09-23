@@ -12,7 +12,7 @@ public class CredentialRetriever {
 
     public CredentialRetriever() {
         Properties properties = new Properties();
-        File configFile = new File("/home/alex/Desktop/SMS-Reminder-Service/.idea/twilio.properties");
+        File configFile = new File("/home/alex/Desktop/WhatsService/WhatsappServiceProduction/.idea/twilio.properties");
         try (InputStream input = new FileInputStream(configFile)) {
             properties.load(input);
             accountSid = properties.getProperty("account_sid");
