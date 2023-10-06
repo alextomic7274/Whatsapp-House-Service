@@ -8,6 +8,7 @@ public class ReminderService {
     private ArrayList<CleaningRotaEntry> rotaEntries;
     private CircularRota rota;
     private WhatsappSender whatsappSender;
+    private String menuString = null;
     Thread thread = null;
     public ReminderService() {
         members = new HashMap<>();
@@ -37,40 +38,49 @@ public class ReminderService {
         WhatsappReceiver whatsappReceiver = new WhatsappReceiver(whatsappSender, this);
         thread = new Thread(whatsappReceiver);
         thread.start();
+        sendWhatsappMenu(null);
 
     }
 
-    public void stopService() {
-        //thread.interrupt();
-
-    }
-
-    public void sendWhatsappMenu() {
+    public void sendWhatsappMenu(String sender) {
         members.entrySet().stream()
                         .forEach(entry -> {
                             String phone = entry.getValue();
-                            whatsappSender.sendWhatsapp(phone, "House SMS Service Started.\n" +
-                                    "\n" +
-                                    "USAGE:\n"+
-                                    "When house clean is complete, text the number 1 followed by the extra task note\n"+
-                                    "EXAMPLE: 1 Cleaned windows\n"+
-                                    "\n"+
-                                    "Current Rota:\n" +
-                                    rota.getRotaAsString() +
-                                    "\n" +
-                                    "Options:\n" +
-                                    "[1] House clean done (If its your turn)\n" +
-                                    "[2] View Updated House Rota\n" +
-                                    "[3] View Updated Bins Rota\n" +
-                                    "[4] Help\n");
+                            whatsappSender.sendWhatsapp(phone, menuString);
 
                         });
     }
 
     public void processMessage(String message, String senderPhone) {
         String sender = members.get(senderPhone.substring(9));
-        int option = (int) Utils.getFirstNonNullCharinString(message);
+        int option = Utils.getFirstNonNullCharinString(message)-'0';
+        switch(option) {
+            case 1:
+                completeHouseClean(sender, message);
+                break;
+            case 2:
+                sendWhatsappMenu(sender);
+        }
+    }
 
+    private void completeHouseClean(String sender, String message) {
+        rota.iterate();
         //TODO
+    }
+
+    private void initialiseMenu() {
+        menuString = "House SMS Service Started.\n" +
+                "\n" +
+                "USAGE:\n"+
+                "When house clean is complete, text the number 1 followed by the extra task note\n"+
+                "EXAMPLE: 1 Cleaned windows\n"+
+                "\n"+
+                "Current Rota:\n" +
+                rota.getRotaAsString() +
+                "\n" +
+                "Options:\n" +
+                "[1] House clean done (If its your turn)\n" +
+                "[2] View Updated House Rota\n" +
+                "[3] View Updated Bins Rota\n";
     }
 }
