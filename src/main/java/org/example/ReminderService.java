@@ -8,6 +8,7 @@ public class ReminderService {
     private ArrayList<CleaningRotaEntry> rotaEntries;
     private CircularRota rota;
     private WhatsappSender whatsappSender;
+    Thread thread = null;
     public ReminderService() {
         members = new HashMap<>();
         whatsappSender = new WhatsappSender();
@@ -34,28 +35,13 @@ public class ReminderService {
         System.out.println(rotaMembers);
         rota = new CircularRota(rotaMembers);
         WhatsappReceiver whatsappReceiver = new WhatsappReceiver(whatsappSender, this);
-        Thread thread = new Thread(whatsappReceiver);
+        thread = new Thread(whatsappReceiver);
         thread.start();
-        rota.iterate();
-        rota.iterate();
-        rota.iterate();
-        System.out.println("House SMS Service Started.\n" +
-                "\n" +
-                "This tool will help housemates manage cleaning duties\n" +
-                "\n" +
-                "Current House Clean Rota:\n" +
-                rota.getRotaAsString() +
-                "\n" +
-                "Options:\n" +
-                "[1] House clean done (If its your turn)\n" +
-                "[2] Bins taken out (Will rotate through separate list)\n" +
-                "[4] View Updated House Rota\n" +
-                "[5] View Updated Bins Rota\n" +
-                "[6] Help\n");
+
     }
 
     public void stopService() {
-
+        //thread.interrupt();
 
     }
 
@@ -65,23 +51,26 @@ public class ReminderService {
                             String phone = entry.getValue();
                             whatsappSender.sendWhatsapp(phone, "House SMS Service Started.\n" +
                                     "\n" +
-                                    "This tool will help housemates manage cleaning duties\n" +
-                                    "\n" +
-                                    "Current House Clean Rota:\n" +
+                                    "USAGE:\n"+
+                                    "When house clean is complete, text the number 1 followed by the extra task note\n"+
+                                    "EXAMPLE: 1 Cleaned windows\n"+
+                                    "\n"+
+                                    "Current Rota:\n" +
                                     rota.getRotaAsString() +
                                     "\n" +
                                     "Options:\n" +
                                     "[1] House clean done (If its your turn)\n" +
-                                    "[2] Bins taken out (Will rotate through separate list)\n" +
-                                    "[4] View Updated House Rota\n" +
-                                    "[5] View Updated Bins Rota\n" +
-                                    "[6] Help\n");
+                                    "[2] View Updated House Rota\n" +
+                                    "[3] View Updated Bins Rota\n" +
+                                    "[4] Help\n");
 
                         });
     }
 
     public void processMessage(String message, String senderPhone) {
         String sender = members.get(senderPhone.substring(9));
-        System.out.println("Message: "+message+"\n"+"Sender: "+sender);
+        int option = (int) Utils.getFirstNonNullCharinString(message);
+
+        //TODO
     }
 }

@@ -18,7 +18,6 @@ public class CleaningRotaEntry {
     }
 
     public String getDate() {
-        String formattedDate = new SimpleDateFormat("yyyy-MM-dd").format(date);
-        return formattedDate;
+        return new SimpleDateFormat("yyyy-MM-dd").format(date);
     }
 }
