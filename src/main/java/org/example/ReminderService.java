@@ -35,7 +35,7 @@ public class ReminderService {
         ArrayList<String> rotaMembers = new ArrayList<>(members.keySet());
         System.out.println(rotaMembers);
         rota = new CircularRota(rotaMembers);
-        WhatsappReceiver whatsappReceiver = new WhatsappReceiver(whatsappSender, this);
+        WhatsappReceiver whatsappReceiver = new WhatsappReceiver(this);
         thread = new Thread(whatsappReceiver);
         thread.start();
         sendWhatsappMenu(null);
@@ -82,5 +82,9 @@ public class ReminderService {
                 "[1] House clean done (If its your turn)\n" +
                 "[2] View Updated House Rota\n" +
                 "[3] View Updated Bins Rota\n";
+    }
+
+    public void remindMember() {
+        //TODO
     }
 }

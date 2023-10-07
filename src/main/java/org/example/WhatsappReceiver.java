@@ -7,12 +7,9 @@ import java.util.ArrayList;
 import static spark.Spark.*;
 
 public class WhatsappReceiver implements Runnable{
-    private WhatsappSender whatsappSender;
-    private ArrayList<String> commands = new ArrayList<>();
     ReminderService reminderService;
 
-    public WhatsappReceiver(WhatsappSender whatsappSender, ReminderService reminderService) {
-        this.whatsappSender = whatsappSender;
+    public WhatsappReceiver(ReminderService reminderService) {
         this.reminderService = reminderService;
     }
 
@@ -30,7 +27,4 @@ public class WhatsappReceiver implements Runnable{
             Spark.awaitInitialization();
     }
 
-    private void print() {
-        System.out.println(commands);
-    }
 }
