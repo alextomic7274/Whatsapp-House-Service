@@ -1,9 +1,6 @@
 package org.example;
 
 import spark.Spark;
-
-import java.util.ArrayList;
-
 import static spark.Spark.*;
 
 public class WhatsappReceiver implements Runnable{

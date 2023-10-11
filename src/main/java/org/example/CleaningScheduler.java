@@ -8,6 +8,7 @@ import java.util.TimerTask;
 public class CleaningScheduler {
 
     private int daysSinceLastClean = 0;
+    private int cleanFrequency = 0;
     private ReminderService reminderService;
 
     public CleaningScheduler(ReminderService reminderService) {
@@ -15,8 +16,9 @@ public class CleaningScheduler {
     }
 
     public void startScheduler(int frequency) {
+        cleanFrequency = frequency;
         Timer timer = new Timer();
-        TimerClass timerClass = new TimerClass();
+        timerTask timerTask = new timerTask();
 
         // Calculate time until next 24 hour interval
         Calendar calendar = Calendar.getInstance();
@@ -27,17 +29,21 @@ public class CleaningScheduler {
         Date startTime = calendar.getTime();
         long delay = startTime.getTime() - System.currentTimeMillis();
 
-        timer.schedule(timerClass, delay, 24 * 60 * 60 * 1000);
+        timer.schedule(timerTask, delay, 24 * 60 * 60 * 1000);
 
     }
 
-    public class TimerClass extends TimerTask {
+    public class timerTask extends TimerTask {
         @Override
         public void run() {
             daysSinceLastClean++;
-            if (daysSinceLastClean >= 8) {
+            if (daysSinceLastClean >= cleanFrequency) {
                 reminderService.remindMember();
             }
         }
+    }
+
+    public void resetScheduler() {
+        daysSinceLastClean = 0;
     }
 }

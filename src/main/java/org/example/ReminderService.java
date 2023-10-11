@@ -1,6 +1,5 @@
 package org.example;
 
-import java.lang.reflect.Array;
 import java.util.*;
 
 public class ReminderService {
@@ -10,13 +9,14 @@ public class ReminderService {
     private WhatsappSender whatsappSender;
     private String menuString = null;
     Thread thread = null;
+    private CleaningScheduler cleaningScheduler = null;
     public ReminderService() {
         members = new HashMap<>();
         whatsappSender = new WhatsappSender();
     }
 
     public void addHousemate(Housemate housemate) {
-        members.put(housemate.getPhoneNumber(), housemate.getName());
+        members.put(housemate.getName(), housemate.getPhoneNumber());
     }
 
     public void removeHousemate(String name) {
@@ -27,7 +27,7 @@ public class ReminderService {
         for (Map.Entry<String, String> entry : members.entrySet()) {
             String key = entry.getKey();
             String value = entry.getValue();
-            System.out.println("Name:" + value + " - Phone:" + key);
+            System.out.println("Name:" + key + " - Phone:" + value);
         }
     }
 
@@ -38,16 +38,17 @@ public class ReminderService {
         WhatsappReceiver whatsappReceiver = new WhatsappReceiver(this);
         thread = new Thread(whatsappReceiver);
         thread.start();
-        sendWhatsappMenu(null);
-
+        Utils.setMenuString(rota.getRotaAsString());
+        //sendWhatsappMenu(null);
+        cleaningScheduler = new CleaningScheduler(this);
+        cleaningScheduler.startScheduler(8);
     }
 
-    public void sendWhatsappMenu(String sender) {
+    public void broadcastMessage(String message) {
         members.entrySet().stream()
                         .forEach(entry -> {
-                            String phone = entry.getValue();
-                            whatsappSender.sendWhatsapp(phone, menuString);
-
+                            String phone = entry.getKey();
+                            whatsappSender.sendWhatsapp(phone, message);
                         });
     }
 
@@ -59,32 +60,17 @@ public class ReminderService {
                 completeHouseClean(sender, message);
                 break;
             case 2:
-                sendWhatsappMenu(sender);
+                broadcastMessage(Utils.getMenuString());
         }
     }
 
     private void completeHouseClean(String sender, String message) {
         rota.iterate();
+        cleaningScheduler.resetScheduler();
         //TODO
-    }
-
-    private void initialiseMenu() {
-        menuString = "House SMS Service Started.\n" +
-                "\n" +
-                "USAGE:\n"+
-                "When house clean is complete, text the number 1 followed by the extra task note\n"+
-                "EXAMPLE: 1 Cleaned windows\n"+
-                "\n"+
-                "Current Rota:\n" +
-                rota.getRotaAsString() +
-                "\n" +
-                "Options:\n" +
-                "[1] House clean done (If its your turn)\n" +
-                "[2] View Updated House Rota\n" +
-                "[3] View Updated Bins Rota\n";
     }
 
     public void remindMember() {
-        //TODO
+        whatsappSender.sendWhatsapp(members.get(rota.getDueHousemate()), rota.getDueHousemate()+", You are due to clean the house :)\n When finished, text the number 1 followed by the extra task note");
     }
 }
