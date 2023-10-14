@@ -31,7 +31,6 @@ public class Menu {
                 removeMember();
             case 4:
                 reminderService.startService();
-                menuDisplay.setStatus(true);
                 break;
         }
 
@@ -50,7 +49,7 @@ public class Menu {
                 }
             }   catch (InputMismatchException e) {
                 System.out.println("Invalid Input. Enter valid number");
-                scanner.nextLine();
+                scanner.next();
             }
         }
             for (int i = 1; i <= housemateCount; i++) {

@@ -4,11 +4,11 @@ import java.util.*;
 
 public class ReminderService {
     private Map<String, String> members = null;
-    private ArrayList<CleaningRotaEntry> rotaEntries;
     private CircularRota rota;
+    private List<String> rotaEntries;
     private WhatsappSender whatsappSender;
-    private String menuString = null;
-    Thread thread = null;
+    private Thread thread = null;
+
     private CleaningScheduler cleaningScheduler = null;
     public ReminderService() {
         members = new HashMap<>();
@@ -32,45 +32,57 @@ public class ReminderService {
     }
 
     public void startService() {
-        ArrayList<String> rotaMembers = new ArrayList<>(members.keySet());
-        System.out.println(rotaMembers);
-        rota = new CircularRota(rotaMembers);
+        whatsappSender.sendWhatsapp("+353871620886", "Test");
+        rota = new CircularRota(new ArrayList<>(members.keySet()));
         WhatsappReceiver whatsappReceiver = new WhatsappReceiver(this);
+        // TODO Sends text if hardcoded but cant read number from hashmap correctly
+
         thread = new Thread(whatsappReceiver);
         thread.start();
+
         Utils.setMenuString(rota.getRotaAsString());
-        //sendWhatsappMenu(null);
-        cleaningScheduler = new CleaningScheduler(this);
-        cleaningScheduler.startScheduler(8);
+        //broadcastMessage(Utils.getMenuString());
+        //cleaningScheduler = new CleaningScheduler(this);
+        //cleaningScheduler.startScheduler(3);
     }
 
     public void broadcastMessage(String message) {
         members.entrySet().stream()
                         .forEach(entry -> {
-                            String phone = entry.getKey();
+                            String phone = entry.getValue();
                             whatsappSender.sendWhatsapp(phone, message);
                         });
     }
 
-    public void processMessage(String message, String senderPhone) {
-        String sender = members.get(senderPhone.substring(9));
+    public synchronized void processMessage(String message, String senderPhone) {
+        System.out.println(message + "\n" + senderPhone);
+        String sender = Utils.searchMapByValue(members, senderPhone.substring(9));
         int option = Utils.getFirstNonNullCharinString(message)-'0';
         switch(option) {
             case 1:
+                if (!validateSMSSender(sender)) {
+                    whatsappSender.sendWhatsapp(senderPhone.substring(9), "Error: You are not due to clean " + sender);
+                    break;
+                }
                 completeHouseClean(sender, message);
                 break;
             case 2:
-                broadcastMessage(Utils.getMenuString());
+                broadcastMessage(rota.getRotaAsString());
         }
     }
 
     private void completeHouseClean(String sender, String message) {
         rota.iterate();
         cleaningScheduler.resetScheduler();
-        //TODO
+        rotaEntries.add(Utils.getRotaEntryString(sender, message));
     }
 
     public void remindMember() {
         whatsappSender.sendWhatsapp(members.get(rota.getDueHousemate()), rota.getDueHousemate()+", You are due to clean the house :)\n When finished, text the number 1 followed by the extra task note");
+    }
+
+    private boolean validateSMSSender(String sender) {
+        if (sender.equals(rota.getDueHousemate())) return true;
+        return false;
     }
 }

@@ -29,7 +29,9 @@ public class CleaningScheduler {
         Date startTime = calendar.getTime();
         long delay = startTime.getTime() - System.currentTimeMillis();
 
-        timer.schedule(timerTask, delay, 24 * 60 * 60 * 1000);
+        //timer.schedule(timerTask, delay, 24 * 60 * 60 * 1000);
+        timer.schedule(timerTask, 0, 30 * 1000);
+
 
     }
 
@@ -37,7 +39,7 @@ public class CleaningScheduler {
         @Override
         public void run() {
             daysSinceLastClean++;
-            if (daysSinceLastClean >= cleanFrequency) {
+            if (daysSinceLastClean == cleanFrequency) {
                 reminderService.remindMember();
             }
         }

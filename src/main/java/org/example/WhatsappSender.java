@@ -14,12 +14,11 @@ public class WhatsappSender {
     public void sendWhatsapp(String phone, String textBody) {
         Twilio.init(credentialRetriever.getAccountSid(), credentialRetriever.getAuthToken());
         Message message = Message.creator(
-                new com.twilio.type.PhoneNumber(phone),
+                new com.twilio.type.PhoneNumber("whatsapp:"+phone),
                 new com.twilio.type.PhoneNumber("whatsapp:+14155238886"),
                 textBody)
 
                         .create();
-
         System.out.println(message.getSid());
     }
 }

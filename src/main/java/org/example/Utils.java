@@ -1,5 +1,10 @@
 package org.example;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.Map;
+
 public class Utils {
     private static String menuString = null;
 
@@ -33,6 +38,22 @@ public class Utils {
 
     public static String getMenuString() {
         return menuString;
+    }
+
+    public static String getRotaEntryString(String member, String note) {
+        LocalDate currentDate = LocalDate.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        return (currentDate.format(formatter) + " - " + member + " - " + note);
+    }
+
+    // Generic method that searches any hashmap for a key according to the value.
+    public static <K, V> K searchMapByValue(Map<K, V> map, V targetValue) {
+        for (Map.Entry<K, V> entry : map.entrySet()) {
+            if (entry.getValue() != null && entry.getValue().equals(targetValue)) {
+                return entry.getKey();
+            }
+        }
+        return null;
     }
 
 
