@@ -39,7 +39,7 @@ public class CleaningScheduler {
         @Override
         public void run() {
             daysSinceLastClean++;
-            if (daysSinceLastClean == cleanFrequency) {
+            if (daysSinceLastClean >= cleanFrequency) {
                 reminderService.remindMember();
             }
         }

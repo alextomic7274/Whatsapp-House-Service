@@ -32,48 +32,51 @@ public class ReminderService {
     }
 
     public void startService() {
-        whatsappSender.sendWhatsapp("+353871620886", "Test");
         rota = new CircularRota(new ArrayList<>(members.keySet()));
         WhatsappReceiver whatsappReceiver = new WhatsappReceiver(this);
-        // TODO Sends text if hardcoded but cant read number from hashmap correctly
 
         thread = new Thread(whatsappReceiver);
         thread.start();
 
         Utils.setMenuString(rota.getRotaAsString());
-        //broadcastMessage(Utils.getMenuString());
-        //cleaningScheduler = new CleaningScheduler(this);
-        //cleaningScheduler.startScheduler(3);
+        broadcastMessage(Utils.getMenuString(), null);
+        cleaningScheduler = new CleaningScheduler(this);
+        cleaningScheduler.startScheduler(2);
     }
 
-    public void broadcastMessage(String message) {
-        members.entrySet().stream()
-                        .forEach(entry -> {
+    public void broadcastMessage(String message, String justThisPerson) {
+        members.entrySet()
+                .stream()
+                .filter(entry -> justThisPerson == null || entry.getKey().equals(justThisPerson))
+                .forEach(entry -> {
                             String phone = entry.getValue();
                             whatsappSender.sendWhatsapp(phone, message);
                         });
     }
 
     public synchronized void processMessage(String message, String senderPhone) {
-        System.out.println(message + "\n" + senderPhone);
+        System.out.println(senderPhone + ": " + message);
         String sender = Utils.searchMapByValue(members, senderPhone.substring(9));
         int option = Utils.getFirstNonNullCharinString(message)-'0';
         switch(option) {
             case 1:
                 if (!validateSMSSender(sender)) {
                     whatsappSender.sendWhatsapp(senderPhone.substring(9), "Error: You are not due to clean " + sender);
-                    break;
+                } else {
+                    completeHouseClean(sender, message);
                 }
-                completeHouseClean(sender, message);
                 break;
             case 2:
-                broadcastMessage(rota.getRotaAsString());
+                broadcastMessage(rota.getRotaAsString(), sender);
+            case 3:
+                sendCleanLog(sender);
         }
     }
 
     private void completeHouseClean(String sender, String message) {
         rota.iterate();
         cleaningScheduler.resetScheduler();
+        broadcastMessage("House clean complete!\n"+rota.getRotaAsString(), null);
         rotaEntries.add(Utils.getRotaEntryString(sender, message));
     }
 
@@ -84,5 +87,14 @@ public class ReminderService {
     private boolean validateSMSSender(String sender) {
         if (sender.equals(rota.getDueHousemate())) return true;
         return false;
+    }
+
+    private void sendCleanLog(String sender) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Clean Log:\n");
+        for (String s : rotaEntries) {
+            sb.append(s+"\n");
+        }
+        broadcastMessage(sb.toString(), sender);
     }
 }
